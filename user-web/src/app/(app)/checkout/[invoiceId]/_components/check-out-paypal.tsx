@@ -2,8 +2,7 @@
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
-import { router } from 'next/client';
-// import { useRouter } from "next/navigation"; // Dùng nếu muốn chuyển trang sau khi thanh toán
+import { useRouter } from "next/navigation";
 
 interface Props {
     invoiceId: string; // Truyền mã hóa đơn (Guid) từ trang cha vào đây
@@ -11,8 +10,7 @@ interface Props {
 
 export default function PayPalCheckoutButton({ invoiceId }: Props) {
 	const [message, setMessage] = useState('');
-	// const router = useRouter();
-	const id = invoiceId;
+	const router = useRouter();
 	// Cấu hình khởi tạo PayPal
 	const initialOptions = {
 		clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
@@ -34,7 +32,8 @@ export default function PayPalCheckoutButton({ invoiceId }: Props) {
 								{
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
-									body: JSON.stringify({ invoiceId: invoiceId }), // Payload khớp với CheckoutRequest ở Backend
+									credentials: 'include', // Gửi HttpOnly Cookie (X-Access-Token) kèm request
+									body: JSON.stringify({ invoiceId: invoiceId }),
 								},
 							);
 
@@ -63,6 +62,7 @@ export default function PayPalCheckoutButton({ invoiceId }: Props) {
 								{
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
+									credentials: 'include', // Gửi HttpOnly Cookie (X-Access-Token) kèm request
 								},
 							);
 

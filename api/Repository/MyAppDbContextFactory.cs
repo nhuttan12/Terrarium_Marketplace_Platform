@@ -23,7 +23,8 @@ namespace api.Repository
                 throw new Exception("Lỗi Design-Time: Không tìm thấy MSSQL_SA_PASSWORD trong file .env!");
             }
 
-            var connectionString = $"Server=localhost,{dbPort};Database=tmdt_2026;User Id=sa;Password={dbPass};TrustServerCertificate=True;MultipleActiveResultSets=true";
+            var port = string.IsNullOrEmpty(dbPort) ? "1433" : dbPort;
+            var connectionString = $"Server=localhost,{port};Database=tmdt_2026;User Id=sa;Password={dbPass};TrustServerCertificate=True;MultipleActiveResultSets=true";
 
             // 3. Khởi tạo và trả về DbContext độc lập
             var optionsBuilder = new DbContextOptionsBuilder<MyAppDbContext>();

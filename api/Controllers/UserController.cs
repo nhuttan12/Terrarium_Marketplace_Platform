@@ -24,7 +24,6 @@ namespace api.Controllers
     public class UserController(IUserService UserService) : BaseController
     {
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto)
         {
             var user = await UserService.CreateAsync(userCreateDto);

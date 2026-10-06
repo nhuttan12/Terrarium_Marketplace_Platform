@@ -7,7 +7,7 @@ import axios, {
 import { type ResponseApi } from '@/types/common/ResponseApi';
 import * as https from 'node:https';
 
-const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7087/api/';
+const API_BASE_URL: string = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7087/api';
 const isDevMode: boolean = process.env.NODE_ENV === 'development';
 
 const httpsAgent: https.Agent = new https.Agent({
