@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using api.Extensions;
 
 namespace api.Services.Payment
 {
@@ -23,12 +24,9 @@ namespace api.Services.Payment
         // 1. Hàm lấy Access Token từ PayPal
         private async Task<string> GetAccessTokenAsync()
         {
-            var clientId = _configuration["PayPal:ClientId"];
-            var secret = _configuration["PayPal:Secret"];
-
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(secret))
-                throw new Exception("Chưa cấu hình ClientId hoặc Secret của PayPal.");
-
+            var clientId = EnvironmentVariables.PayPalClientId;
+            var secret = EnvironmentVariables.PayPalClientSecret;
+            
             var authenticationString = $"{clientId}:{secret}";
             var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationString));
 

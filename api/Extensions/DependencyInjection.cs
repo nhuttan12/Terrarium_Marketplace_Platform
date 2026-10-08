@@ -51,25 +51,7 @@ namespace api.Extensions
             services.AddSingleton<AuditableEntityInterceptor>();
             // Đăng ký các dịch vụ bảo mật tại đây 
             // Đăng ký DbContext với SQL Server
-            services.AddDbContext<MyAppDbContext>((sp, options) =>
-            {
-                // Nếu connection string chứa biến, chúng ta thay thế nó bằng giá trị thực tế từ Environment
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
-                connectionString = connectionString!
-                    .Replace("${MSSQL_PORT}", Environment.GetEnvironmentVariable(Variable) ?? "1433")
-                    .Replace("${MSSQL_SA_PASSWORD}", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD") ?? "YourStrongPassword123!");
-
-                options.UseSqlServer(connectionString,
-                sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null);
-                });
-                var interceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-                options.AddInterceptors(interceptor);
-            });
+            
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             // email 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));

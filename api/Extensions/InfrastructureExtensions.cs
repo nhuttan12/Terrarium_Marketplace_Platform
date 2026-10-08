@@ -13,16 +13,7 @@ namespace api.Extensions
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Đăng ký DotNetEnv để load biến môi trường từ file .env
-            Env.Load();
-
-            var dbPort = Environment.GetEnvironmentVariable("MSSQL_PORT") ?? "1433";
-            var dbPass = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
-            var dbPid = Environment.GetEnvironmentVariable("MSSQL_PID");
-
-            var connectionString = $"Server=localhost,{dbPort};Database=tmdt_2026;User Id=sa;Password={dbPass};TrustServerCertificate=True;MultipleActiveResultSets=true";
-
-            services.AddDbContext<MyAppDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<MyAppDbContext>(options => options.UseSqlServer(EnvironmentVariables.ConnectionString));
 
             // Đăng ký AutoMapper
             services.AddAutoMapper(cfg =>
