@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace api.Extensions
 {
@@ -25,50 +26,61 @@ namespace api.Extensions
 
             // Cấu hình JWT Authentication
             var jwtSettings = configuration.GetSection("JwtSettings");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+            var jwtKey = EnvironmentVariables.JwtKey;
+            var key = Encoding.ASCII.GetBytes(jwtKey);
             // Cấu hình Authentication với JWT Bearer
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                // Cấu hình các tham số xác thực token
-                // token sẽ được kiểm tra dựa trên các thông tin như: issuer, audience, lifetime, và signing key
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            services
+                .AddAuthentication(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-                    ClockSkew = TimeSpan.Zero
-                };
-                //  PHẦN QUAN TRỌNG: Cấu hình để lấy Token từ Cookie
-                options.Events = new JwtBearerEvents
+                    options.DefaultAuthenticateScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+
+                    options.DefaultChallengeScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
                 {
-                    OnMessageReceived = context =>
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+
+                    options.TokenValidationParameters =
+                        new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+
+                            ValidIssuer = jwtSettings["Issuer"],
+                            ValidAudience = jwtSettings["Audience"],
+
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(key),
+
+                            ClockSkew = TimeSpan.Zero
+                        };
+
+                    options.Events = new JwtBearerEvents
                     {
-                        context.Token = context.Request.Cookies["X-Access-Token"];
-                        return Task.CompletedTask;
-                    }
-                };
-            }).AddCookie()
-            .AddGoogle(options =>
-            {
-                // Đọc thông tin từ cấu hình (appsettings.json hoặc User Secrets)
-                options.ClientId = configuration["Authentication:Google:ClientId"]
-                                   ?? throw new InvalidOperationException("Google ClientId is missing.");
-                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
-                                      ?? throw new InvalidOperationException("Google ClientSecret is missing.");
-                // (Tùy chọn) Lưu các claim bổ sung từ Google
-                options.SignInScheme = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
-                options.ClaimActions.MapJsonKey("picture", "picture");
-            });
+                        OnMessageReceived = context =>
+                        {
+                            context.Token =
+                                context.Request.Cookies["X-Access-Token"];
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                })
+                .AddCookie()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = EnvironmentVariables.GoogleClientId;
+                    options.ClientSecret = EnvironmentVariables.GoogleClientSecret;
+                    options.SignInScheme = Microsoft.AspNetCore.Authentication.Cookies
+                            .CookieAuthenticationDefaults
+                            .AuthenticationScheme;
+                    options.ClaimActions.MapJsonKey("picture", "picture");
+                });
             // Cấu hình Authorization
             services.AddAuthorization();
 

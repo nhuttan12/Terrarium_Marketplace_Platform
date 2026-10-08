@@ -3,8 +3,11 @@ using api.Extensions;
 using api.Services.Auths;
 using api.Utilities;
 
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services.AddControllers();

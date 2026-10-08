@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using api.Extensions;
 
 namespace api.Services.Auths
 {
@@ -23,7 +24,8 @@ namespace api.Services.Auths
         public TokenService(IOptions<JwtSettings> jwtOptions)
         {
             _jwtSettings = jwtOptions.Value;
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var jwtKey = EnvironmentVariables.JwtKey;
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         }
         //<summary>
         /// Creates a JWT token for the given user.
